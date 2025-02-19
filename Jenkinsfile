@@ -3,25 +3,20 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        sh 'docker build -t your-image:${BUILD_NUMBER} .'
+        sh 'docker build -t test_cicd:${BUILD_NUMBER} .'
       }
     }
     stage('Test') {
       steps {
-        sh 'docker run your-image:${BUILD_NUMBER} npm test'
+        sh 'docker run test_cicd:${BUILD_NUMBER} pytest'
       }
     }
     stage('Push') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
           sh "docker login -u $USER -p $PASS"
-          sh "docker push your-image:${BUILD_NUMBER}"
+          sh "docker push test_cicd:${BUILD_NUMBER}"
         }
-      }
-    }
-    stage('Deploy') {
-      steps {
-        sh "kubectl set image deployment/your-app your-app=your-image:${BUILD_NUMBER}"
       }
     }
   }
